@@ -31,7 +31,7 @@
       <div class="more-sign">
         <h6>社交帐号登录</h6>
         <ul>
-          <li><a id="weixin" class="weixin" target="_blank" href="http://qy.free.idcfengye.com/api/ucenter/weixinLogin/login"><i class="iconfont icon-weixin"/></a></li>
+          <li><a id="weixin" class="weixin" target="_blank" href="https://open.weixin.qq.com/connect/qrconnect?appid=wxed9954c01bb89b47&redirect_uri=http://guli.shop/api/ucenter/wx/callback&response_type=code&scope=snsapi_login&state=atguigu#wechat_redirect"><i class="iconfont icon-weixin"/></a></li>
           <li><a id="qq" class="qq" target="_blank" href="#"><i class="iconfont icon-qq"/></a></li>
         </ul>
       </div>

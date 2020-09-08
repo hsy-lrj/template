@@ -146,15 +146,35 @@ export default {
     };
   },
   created() {
+    //获取路径里面的token值
+    this.token = this.$route.query.token
+     if (this.token) {
+      this.wxLogin()
+    }
     this.showInfo();
   },
   methods: {
+    //微信登录显示方法
+   wxLogin() {
+      if (this.token == '') return
+      //把token存在cookie中、也可以放在localStorage中
+      cookie.set('guli_token', this.token, {domain: 'localhost'})
+      cookie.set('guli_ucenter', '', {domain: 'localhost'})
+      //登录成功根据token获取用户信息
+      userApi.getLoginInfo().then(response => {
+        this.loginInfo = response.data.data.userInfo
+        //将用户信息记录cookie
+        cookie.set('guli_ucenter', this.loginInfo, {domain: 'localhost'})
+      })
+    },
+    //创建方法，从cookie中获取用户信息
     showInfo() {
       var jsonStr = cookie.get("guli_ucenter");
       if (jsonStr) {
         this.loginInfo = JSON.parse(jsonStr);
       }
     },
+    //退出方法
     logout() {
       //debugger
       cookie.set("guli_ucenter", "", { domain: "localhost" });
