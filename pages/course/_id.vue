@@ -12,7 +12,13 @@
       <div>
         <article class="c-v-pic-wrap" style="height: 357px;">
           <section class="p-h-video-box" id="videoPlay">
-            <img :src="courseWebVo.cover" :alt="courseWebVo.cover" class="dis c-v-pic" />
+            <img
+              height="357px"
+              width="640px"
+              :src="courseWebVo.cover"
+              :alt="courseWebVo.cover"
+              class="dis c-v-pic"
+            />
           </section>
         </article>
         <aside class="c-attr-wrap">
@@ -33,13 +39,16 @@
                 <a class="c-fff vam" title="收藏" href="#">收藏</a>
               </span>
             </section>
-            <section class="c-attr-mt">
+            <section v-if="isBuy || Number(courseWebVo.price)==0" class="c-attr-mt">
               <a href="#" title="立即观看" class="comm-btn c-btn-3">立即观看</a>
+            </section>
+            <section v-else class="c-attr-mt">
+              <a @click="createOrder()" href="#" title="立即购买" class="comm-btn c-btn-3">立即购买</a>
             </section>
           </section>
         </aside>
         <aside class="thr-attr-box">
-          <ol class="thr-attr-ol clearfix">
+          <ol class="thr-attr-ol">
             <li>
               <p>&nbsp;</p>
               <aside>
@@ -108,14 +117,19 @@
                               <em class="lh-menu-i-1 icon18 mr10"></em>
                               {{chapter.title}}
                             </a>
-                           <ol class="lh-menu-ol" style="display: block;">
-                              <li v-for="video in chapter.videoVoList" :key="video.id" class="lh-menu-second ml30">
-                                  <a :href="'/player/'+video.videoSourceId" target="_blank">
-                                      <span class="fr">
-                                          <i class="free-icon vam mr10">免费试听</i>
-                                      </span>
-                                      <em class="lh-menu-i-2 icon16 mr5">&nbsp;</em>{{ video.title }}
-                                  </a>
+                            <ol class="lh-menu-ol" style="display: block;">
+                              <li
+                                v-for="video in chapter.videoVoList"
+                                :key="video.id"
+                                class="lh-menu-second ml30"
+                              >
+                                <a :href="'/player/'+video.videoSourceId" target="_blank">
+                                  <span class="fr">
+                                    <i class="free-icon vam mr10">免费试听</i>
+                                  </span>
+                                  <em class="lh-menu-i-2 icon16 mr5">&nbsp;</em>
+                                  {{ video.title }}
+                                </a>
                               </li>
                             </ol>
                           </li>
@@ -164,16 +178,60 @@
 
 <script>
 import course from "@/api/course";
+import order from "@/api/order";
 export default {
   asyncData({ params, error }) {
-    return course
-      .getFrontCourseInfo(params.id) //params.id中的id是文件下划线后面的值
-      .then((response) => {
-        return {
-          courseWebVo: response.data.data.courseWebVo,
-          chapterVoList: response.data.data.chapterVoList,
-        };
+    return {
+      courseId: params.id,
+    };
+  },
+
+  data() {
+    return {
+      courseWebVo: {},
+      chapterVoList: [],
+      isBuy: false,
+      memberIdByJwtToken: "",
+    };
+  },
+
+  created() {
+    this.initCourseInfo();
+    
+  },
+
+  methods: {
+    /**
+     * 查询课程的详情信息
+     */
+    initCourseInfo() {
+      course.getFrontCourseInfo(this.courseId).then((response) => {
+        (this.courseWebVo = response.data.data.courseWebVo),
+          (this.chapterVoList = response.data.data.chapterVoList),
+          (this.isBuy = response.data.data.isBuy);
+        this.memberIdByJwtToken = response.data.data.memberIdByJwtToken;
       });
+      
+    },
+
+    /**
+     * 生成订单
+     */
+    createOrder() {
+      if(this.memberIdByJwtToken==""){
+        this.$message({
+            type: "error",
+            message: "请登录!",
+          });
+      }else{
+        order.createOrder(this.courseId).then((response) => {
+        //获取订单号
+        //跳转到订单显示页面
+        this.$router.push({ path: "/orders/" + response.data.data.orderNo });
+      });
+      }
+      
+    },
   },
 };
 </script>
